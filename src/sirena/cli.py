@@ -86,6 +86,12 @@ def main() -> int:
     if args.editorial_only:
         segments = core.load_segments_from_csv(output_paths["segmentos_csv"])
         metadata = core.load_existing_metadata(outputs_dir)
+        diagnostic: dict = {}
+        if output_paths["diagnostico"].exists():
+            try:
+                diagnostic = json.loads(output_paths["diagnostico"].read_text(encoding="utf-8"))
+            except Exception:
+                diagnostic = {}
         metadata["segment_count"] = len(segments)
         metadata["audio_selected"] = str(selected_audio)
         metadata["selection_note"] = selected_audio_note
@@ -107,9 +113,22 @@ def main() -> int:
         issues = core.validate_outputs(
             [output_paths["resumen"], output_paths["boletin"], output_paths["revision_nombres"]]
         )
-        metadata["run_finished_at"] = datetime.now().isoformat()
-        attach_output_manifest(metadata, output_paths)
-        core.save_diagnostic(output_paths["diagnostico"], metadata)
+        diagnostic.update(
+            {
+                "audio_selected": str(selected_audio),
+                "audio_candidates": [str(path) for path in all_audio],
+                "selection_note": selected_audio_note,
+                "audio_source_mode": "explicit" if args.audio else "autodetect",
+                "layout_requested": args.layout,
+                "protocol_requested": args.protocol,
+                "segment_count": len(segments),
+                "editorial_only": True,
+                "last_editorial_regeneration_at": datetime.now().isoformat(),
+            }
+        )
+        diagnostic["run_finished_at"] = datetime.now().isoformat()
+        attach_output_manifest(diagnostic, output_paths)
+        core.save_diagnostic(output_paths["diagnostico"], diagnostic)
         if issues:
             logger.error("La regeneracion editorial termino con archivos faltantes o vacios: %s", issues)
             return 1
