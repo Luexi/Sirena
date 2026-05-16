@@ -1,6 +1,7 @@
 .venv/
 .cache_models/
 .local_gpu_libs/
+.sirena_state/
 .tools/
 __pycache__/
 *.pyc

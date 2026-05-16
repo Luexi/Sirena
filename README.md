@@ -15,10 +15,13 @@ El proyecto esta pensado para uso personal y para operar en Windows sin depender
 ```text
 .
 |-- pipeline_transcripcion.py
+|-- sirena_web.py
 |-- run_transcripcion.bat
+|-- run_sirena_web.bat
 |-- requirements.txt
 |-- README.md
 |-- AGENTS.md
+|-- audio/
 |-- docs/
 |   `-- output-contract.md
 `-- src/
@@ -27,7 +30,9 @@ El proyecto esta pensado para uso personal y para operar en Windows sin depender
         |-- __main__.py
         |-- cli.py
         |-- core.py
-        `-- paths.py
+        |-- paths.py
+        |-- service.py
+        `-- webapp.py
 ```
 
 ## Instalacion
@@ -39,6 +44,13 @@ run_transcripcion.bat --help
 ```
 
 El `.bat` crea `.venv/`, actualiza `pip`, instala dependencias y ejecuta el pipeline.
+
+## Rutas oficiales
+
+Sirena ahora tiene dos rutas de uso oficiales:
+
+- `CLI`: pensada para automatizacion, agentes y uso por terminal.
+- `App web local`: pensada para uso manual con navegador en `localhost`.
 
 ## Uso rapido
 
@@ -69,6 +81,38 @@ run_transcripcion.bat --audio .\audio_nuevo.mpeg --editorial-only
 ### Compatibilidad con el flujo anterior
 
 Si no pasas `--audio`, Sirena intenta detectar automaticamente un archivo compatible en `.\audio\` y luego en la raiz del proyecto.
+
+## App web local
+
+### Abrir la app en Windows
+
+```bat
+run_sirena_web.bat
+```
+
+### Abrirla manualmente con Streamlit
+
+```bat
+.\.venv\Scripts\python.exe -m streamlit run sirena_web.py --server.address 127.0.0.1
+```
+
+La app corre solo en `localhost`, lista audios detectados, permite subir nuevos archivos a `.\audio\`, lanzar transcripciones y revisar resultados existentes.
+
+## Compatibilidad con agentes
+
+- Codex puede seguir usando `run_transcripcion.bat --audio ...` sin pasar por la app.
+- La app y el CLI comparten la misma logica interna.
+- Cualquier corrida hecha por app o CLI escribe en la misma estructura `salidas/<audio-slug>/`.
+
+## Carpeta de entrada recomendada
+
+Aunque el CLI sigue aceptando archivos en la raiz, la carpeta recomendada para trabajo manual y para la app es:
+
+```text
+audio/
+```
+
+Si subes un archivo desde la app, Sirena lo guarda ahi para que tambien quede disponible para corridas futuras o para agentes.
 
 ## Salidas por audio
 
@@ -112,6 +156,12 @@ Archivos generados:
 - El pipeline intenta usar GPU NVIDIA con librerias locales en `.local_gpu_libs/`.
 - Si la GPU falla por DLLs o compatibilidad, cambia automaticamente a CPU.
 - El resultado real de la corrida queda registrado en `diagnostico.json`.
+
+## Estado de jobs
+
+- Sirena mantiene un registro local ligero en `.sirena_state/`.
+- La app bloquea nuevas corridas si ya hay una en ejecucion.
+- El historial principal sigue reconstruyendose desde `salidas/` y `diagnostico.json`.
 
 ## Preparacion para GitHub
 

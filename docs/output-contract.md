@@ -24,6 +24,11 @@ Cada corrida de Sirena produce una carpeta aislada en `salidas/<audio-slug>/`.
 - `muestra_validacion.json`: metadata de la muestra inicial.
 - `muestra_transcripcion.txt`: solo existe en modo `--sample-only`.
 
+## Estado local de la app
+
+- `.sirena_state/jobs.json`: registro local ligero de jobs para la app web y para evitar corridas concurrentes.
+- `audio/`: carpeta de trabajo recomendada para audios subidos desde la interfaz web.
+
 ## Insumos recomendados para agentes
 
 - Primera lectura: `resumen.md`
